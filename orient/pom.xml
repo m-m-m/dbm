@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.github.m-m-m</groupId>
+    <artifactId>mmm-dbm-parent</artifactId>
+    <version>${revision}</version>
+  </parent>
+  <artifactId>mmm-dbm-orient</artifactId>
+  <packaging>jar</packaging>
+  <name>${project.artifactId}</name>
+  <description>Database bean mapping for OrientDB.</description>
+
+  <properties>
+    <orientdb.version>3.1.6</orientdb.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mmm-dbm-base</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.orientechnologies</groupId>
+      <artifactId>orientdb-core</artifactId>
+      <version>${orientdb.version}</version>
+    </dependency>
+  </dependencies>
+</project>
