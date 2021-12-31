@@ -9,7 +9,7 @@
 @SuppressWarnings("all") //
 module io.github.mmm.dbm.api {
 
-  requires transitive io.github.mmm.entity.bean;
+  requires transitive io.github.mmm.entity.dao;
 
   exports io.github.mmm.dbm.config;
 
