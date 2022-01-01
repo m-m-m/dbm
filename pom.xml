@@ -17,11 +17,18 @@
   <properties>
     <revision>0-SNAPSHOT</revision>
     <mmm.repository>dbm</mmm.repository>
+    <r2dbc.version>0.9.0.RELEASE</r2dbc.version>
+    <r2dbc.postgresql.version>0.9.0.RC1</r2dbc.postgresql.version>
+    <r2dbc.mariadb.version>1.1.1-rc</r2dbc.mariadb.version>
+    <r2dbc.mssql.version>0.9.0.RC1</r2dbc.mssql.version>
+    <r2dbc.h2.version>0.9.0.M1</r2dbc.h2.version>
+    <r2dbc.oracle.version>0.4.0</r2dbc.oracle.version>
   </properties>
-
+  
   <modules>
     <module>api</module>
     <module>base</module>
+    <module>r2dbc</module>
     <module>orient</module>
   </modules>
 
@@ -46,8 +53,43 @@
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>mmm-dbm-r2dbc</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>mmm-dbm-orient</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.r2dbc</groupId>
+        <artifactId>r2dbc-spi</artifactId>
+        <version>${r2dbc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>r2dbc-postgresql</artifactId>
+        <version>${r2dbc.postgresql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mariadb</groupId>
+        <artifactId>r2dbc-mariadb</artifactId>
+        <version>${r2dbc.mariadb.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.r2dbc</groupId>
+        <artifactId>r2dbc-mssql</artifactId>
+        <version>${r2dbc.mssql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.r2dbc</groupId>
+        <artifactId>r2dbc-h2</artifactId>
+        <version>${r2dbc.h2.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.oracle.database.r2dbc</groupId>
+        <artifactId>oracle-r2dbc</artifactId>
+        <version>${r2dbc.oracle.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

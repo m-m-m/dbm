@@ -9,12 +9,12 @@ import org.reactivestreams.Publisher;
  *
  * @since 1.0.0
  */
-public interface Db extends AutoCloseable {
+public interface DbClient extends AutoCloseable {
 
   /**
-   * @return a new {@link Tx transaction}.
+   * @return a {@link Publisher} of the {@link EntityBeanManager} to run a transaction.
    */
-  Publisher<? extends Tx> tx();
+  Publisher<EntityBeanManager> tx();
 
   @Override
   void close();

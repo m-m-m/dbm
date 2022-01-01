@@ -7,9 +7,15 @@
  * Provides the API for mapping between database and {@link EntityBean}s.<br>
  */
 @SuppressWarnings("all") //
-module io.github.mmm.dbm.api {
+module io.github.mmm.dbm {
+
+  requires transitive io.github.mmm.bean.factory;
 
   requires transitive io.github.mmm.entity.dao;
+
+  uses io.github.mmm.dbm.DbClientFactory;
+
+  exports io.github.mmm.dbm;
 
   exports io.github.mmm.dbm.config;
 
