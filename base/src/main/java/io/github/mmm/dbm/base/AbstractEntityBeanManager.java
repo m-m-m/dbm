@@ -15,7 +15,7 @@ import io.github.mmm.entity.bean.sql.SqlDialect;
 import io.github.mmm.entity.bean.sql.delete.Delete;
 import io.github.mmm.entity.bean.sql.delete.DeleteStatement;
 import io.github.mmm.entity.bean.sql.insert.InsertStatement;
-import io.github.mmm.entity.bean.sql.select.Select;
+import io.github.mmm.entity.bean.sql.select.SelectEntity;
 import io.github.mmm.entity.bean.sql.select.SelectStatement;
 import io.github.mmm.entity.bean.sql.update.UpdateStatement;
 import io.github.mmm.entity.id.Id;
@@ -100,14 +100,15 @@ public abstract class AbstractEntityBeanManager implements EntityBeanManager {
     Id<E> id = ids.iterator().next();
     Class<E> entityType = id.getType();
     E entity = BeanFactory.get().create(entityType);
-    Select select;
+    SelectEntity<E> select = new SelectEntity<>(entity);
     if (entity.isDynamic()) {
-      select = new Select();
     } else {
       List<PropertyPath<?>> properties = getProperties(entity);
-      select = new Select(properties.toArray(new PropertyPath[properties.size()]));
+      for (PropertyPath<?> property : properties) {
+        select.and(property);
+      }
     }
-    return select.from(entity).where(entity.Id().in((Collection) ids)).get();
+    return select.from().where(entity.Id().in((Collection) ids)).get();
   }
 
   private List<PropertyPath<?>> getProperties(WritableBean entity) {
