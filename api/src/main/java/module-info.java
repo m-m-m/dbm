@@ -11,7 +11,11 @@ module io.github.mmm.dbm {
 
   requires transitive io.github.mmm.bean.factory;
 
-  requires transitive io.github.mmm.entity.dao;
+  requires transitive io.github.mmm.entity.bean;
+
+  requires transitive reactor.core;
+
+  requires transitive org.reactivestreams;
 
   uses io.github.mmm.dbm.DbClientFactory;
 
