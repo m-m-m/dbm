@@ -13,6 +13,7 @@ import io.github.mmm.entity.bean.EntityBean;
 import io.github.mmm.entity.bean.sql.AbstractStatement;
 import io.github.mmm.entity.bean.sql.SqlDialect;
 import io.github.mmm.entity.bean.sql.SqlFormatter;
+import io.github.mmm.entity.bean.sql.select.Select;
 import io.github.mmm.entity.bean.sql.select.SelectStatement;
 import io.github.mmm.property.criteria.CriteriaSqlParameters;
 import io.github.mmm.property.criteria.CriteriaSqlParametersIndexed;
@@ -54,41 +55,54 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
   }
 
   @Override
-  public <E extends EntityBean> Mono<E> find(SelectStatement<E> select) {
+  public <R extends EntityBean> Mono<R> find(SelectStatement<R> select) {
 
     if (select == null) {
       return Mono.empty();
     }
-    E entity = select.getFrom().getEntity();
+    EntityBean entity = select.getFrom().getEntity();
     Statement statement = createStatement(select);
     return null; // Mono.from(statement.execute()).map(r -> map(r, entity));
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public <E extends EntityBean> Flux<E> findAll(SelectStatement<E> select) {
+  public <R> Flux<R> findAll(SelectStatement<R> selectStatement) {
 
-    if (select == null) {
+    if (selectStatement == null) {
       return Flux.empty();
     }
-    E entity = select.getFrom().getEntity();
-    Statement statement = createStatement(select);
-    return Flux.from(statement.execute()).flatMap(r -> map(r, entity));
+    Select<R> select = selectStatement.getSelect();
+    R result = select.getResultBean();
+    if (result == null) {
+      int size = select.getSelections().size();
+      if (size == 0) {
+        result = (R) selectStatement.getFrom().getEntity();
+      }
+    }
+    Statement statement = createStatement(selectStatement);
+    return Flux.from(statement.execute()).flatMap(r -> map(r, result));
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  protected <B extends WritableBean> Publisher<B> map(Result result, B prototype) {
+  protected <R> Publisher<R> mapToBean(Result result, WritableBean prototype, Select<R> select) {
 
     return result.map((row, rowMetadata) -> {
-      B bean = ReadableBean.newInstance(prototype);
+      WritableBean bean = ReadableBean.newInstance(prototype);
       for (ColumnMetadata col : row.getMetadata().getColumnMetadatas()) {
-        String name = col.getName();
-        Object value = row.get(name);
-        bean.set(name, value, (Class) col.getJavaType());
+        String columnName = col.getName();
+        Object value = row.get(columnName);
+        String propertyName = columnName;
+        bean.set(propertyName, value, (Class) col.getJavaType());
       }
-      return bean;
+      return (R) bean;
     });
   }
 
+  /**
+   * @param statement the {@link AbstractStatement} to convert.
+   * @return the converted R2DBC {@link Statement}.
+   */
   protected Statement createStatement(AbstractStatement<?> statement) {
 
     SqlFormatter formatter = getDialect().createFormatter();
