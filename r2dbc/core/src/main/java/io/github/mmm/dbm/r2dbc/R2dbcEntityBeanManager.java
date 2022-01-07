@@ -3,6 +3,8 @@ package io.github.mmm.dbm.r2dbc;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 
@@ -13,6 +15,7 @@ import io.github.mmm.entity.bean.EntityBean;
 import io.github.mmm.entity.bean.sql.AbstractStatement;
 import io.github.mmm.entity.bean.sql.SqlDialect;
 import io.github.mmm.entity.bean.sql.SqlFormatter;
+import io.github.mmm.entity.bean.sql.select.Result.ResultEntry;
 import io.github.mmm.entity.bean.sql.select.Select;
 import io.github.mmm.entity.bean.sql.select.SelectStatement;
 import io.github.mmm.property.criteria.CriteriaSqlParameters;
@@ -65,29 +68,80 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
     return null; // Mono.from(statement.execute()).map(r -> map(r, entity));
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public <R> Flux<R> findAll(SelectStatement<R> selectStatement) {
 
     if (selectStatement == null) {
       return Flux.empty();
     }
-    Select<R> select = selectStatement.getSelect();
-    R result = select.getResultBean();
-    if (result == null) {
-      int size = select.getSelections().size();
-      if (size == 0) {
-        result = (R) selectStatement.getFrom().getEntity();
-      }
-    }
     Statement statement = createStatement(selectStatement);
-    return Flux.from(statement.execute()).flatMap(r -> map(r, result));
+    Select<R> select = selectStatement.getSelect();
+    if (select.isSelectSingle()) {
+      return Flux.from(statement.execute()).flatMap(r -> mapToSingle(r, select));
+    } else if (select.isSelectResult()) {
+      return (Flux) Flux.from(statement.execute()).flatMap(r -> mapToResult(r, select));
+    } else {
+      WritableBean prototype;
+      if (select.isSelectEntity()) {
+        prototype = selectStatement.getFrom().getEntity();
+      } else {
+        prototype = (WritableBean) select.getResultBean();
+      }
+      Objects.requireNonNull(prototype, "bean");
+      return Flux.from(statement.execute()).flatMap(r -> mapToBean(r, select, prototype));
+    }
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  protected <R> Publisher<R> mapToBean(Result result, WritableBean prototype, Select<R> select) {
+  /**
+   * @param <R> type of the result.
+   * @param r2result the R2DBC {@link Result}.
+   * @param select the {@link Select} clause.
+   * @return the {@link Publisher} of the results.
+   */
+  @SuppressWarnings("unchecked")
+  protected <R> Publisher<R> mapToSingle(Result r2result, Select<R> select) {
 
-    return result.map((row, rowMetadata) -> {
+    return r2result.map((row, rowMetadata) -> {
+
+      // TODO potential type conversion from DB type to property type.
+      return (R) row.get(0);
+    });
+  }
+
+  /**
+   * @param r2result the R2DBC {@link Result}.
+   * @param select the {@link Select} clause.
+   * @return the {@link Publisher} of the results.
+   */
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  protected Publisher<io.github.mmm.entity.bean.sql.select.Result> mapToResult(Result r2result, Select<?> select) {
+
+    return r2result.map((row, rowMetadata) -> {
+      List<? extends ColumnMetadata> columnMetadatas = row.getMetadata().getColumnMetadatas();
+      ResultEntry[] entries = new ResultEntry[columnMetadatas.size()];
+      int i = 0;
+      for (ColumnMetadata col : columnMetadatas) {
+        String columnName = col.getName();
+        Object value = row.get(columnName);
+        Supplier<?> selection = select.getSelections().get(i);
+        entries[i++] = new ResultEntry(selection, value);
+      }
+      return new io.github.mmm.entity.bean.sql.select.Result(entries);
+    });
+  }
+
+  /**
+   * @param <R> type of the result.
+   * @param r2result the R2DBC {@link Result}.
+   * @param select the {@link Select} clause.
+   * @param prototype the {@link WritableBean} to use as prototype to create the actual result objects.
+   * @return the {@link Publisher} of the results.
+   */
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  protected <R> Publisher<R> mapToBean(Result r2result, Select<R> select, WritableBean prototype) {
+
+    return r2result.map((row, rowMetadata) -> {
       WritableBean bean = ReadableBean.newInstance(prototype);
       for (ColumnMetadata col : row.getMetadata().getColumnMetadatas()) {
         String columnName = col.getName();
