@@ -11,7 +11,7 @@ module io.github.mmm.dbm {
 
   requires transitive io.github.mmm.bean.factory;
 
-  requires transitive io.github.mmm.entity.bean;
+  requires transitive io.github.mmm.entity.db;
 
   requires transitive reactor.core;
 

@@ -6,7 +6,7 @@ import org.reactivestreams.Subscription;
 
 import io.github.mmm.dbm.DbClient;
 import io.github.mmm.dbm.EntityBeanManager;
-import io.github.mmm.entity.bean.sql.SqlDialect;
+import io.github.mmm.entity.bean.db.dialect.DbDialect;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 
@@ -44,7 +44,7 @@ public class R2dbcClient implements DbClient {
         @Override
         public void onNext(Connection c) {
 
-          SqlDialect dialect = null;
+          DbDialect dialect = null;
           s.onNext(new R2dbcEntityBeanManager(c, dialect));
         }
 

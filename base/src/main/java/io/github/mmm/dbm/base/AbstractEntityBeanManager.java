@@ -11,13 +11,13 @@ import io.github.mmm.bean.WritableBean;
 import io.github.mmm.bean.property.BeanProperty;
 import io.github.mmm.dbm.EntityBeanManager;
 import io.github.mmm.entity.bean.EntityBean;
-import io.github.mmm.entity.bean.sql.SqlDialect;
-import io.github.mmm.entity.bean.sql.delete.Delete;
-import io.github.mmm.entity.bean.sql.delete.DeleteStatement;
-import io.github.mmm.entity.bean.sql.insert.InsertStatement;
-import io.github.mmm.entity.bean.sql.select.SelectEntity;
-import io.github.mmm.entity.bean.sql.select.SelectStatement;
-import io.github.mmm.entity.bean.sql.update.UpdateStatement;
+import io.github.mmm.entity.bean.db.dialect.DbDialect;
+import io.github.mmm.entity.bean.db.statement.delete.Delete;
+import io.github.mmm.entity.bean.db.statement.delete.DeleteStatement;
+import io.github.mmm.entity.bean.db.statement.insert.InsertStatement;
+import io.github.mmm.entity.bean.db.statement.select.SelectEntity;
+import io.github.mmm.entity.bean.db.statement.select.SelectStatement;
+import io.github.mmm.entity.bean.db.statement.update.UpdateStatement;
 import io.github.mmm.entity.id.Id;
 import io.github.mmm.property.WritableProperty;
 import io.github.mmm.value.PropertyPath;
@@ -32,15 +32,9 @@ import reactor.core.publisher.Mono;
 public abstract class AbstractEntityBeanManager implements EntityBeanManager {
 
   /**
-   * @return the {@link SqlDialect} of the database.
+   * @return the {@link DbDialect} of the database.
    */
-  public abstract SqlDialect getDialect();
-
-  protected String getColumnName(WritableProperty<?> property) {
-
-    // TODO allow @Column mapping
-    return property.getName();
-  }
+  public abstract DbDialect getDialect();
 
   @Override
   public <E extends EntityBean> Flux<E> findAllById(Collection<Id<E>> ids) {
@@ -81,7 +75,7 @@ public abstract class AbstractEntityBeanManager implements EntityBeanManager {
       return null;
     }
     Id<E> id = ids.iterator().next();
-    Class<E> entityType = id.getType();
+    Class<E> entityType = id.getEntityType();
     E entity = BeanFactory.get().create(entityType);
     return new Delete().from(entity).where(entity.Id().in((Collection) ids)).get();
   }
@@ -98,7 +92,7 @@ public abstract class AbstractEntityBeanManager implements EntityBeanManager {
       return null;
     }
     Id<E> id = ids.iterator().next();
-    Class<E> entityType = id.getType();
+    Class<E> entityType = id.getEntityType();
     E entity = BeanFactory.get().create(entityType);
     SelectEntity<E> select = new SelectEntity<>(entity);
     if (entity.isDynamic()) {

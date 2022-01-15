@@ -12,15 +12,15 @@ import io.github.mmm.bean.ReadableBean;
 import io.github.mmm.bean.WritableBean;
 import io.github.mmm.dbm.base.AbstractEntityBeanManager;
 import io.github.mmm.entity.bean.EntityBean;
-import io.github.mmm.entity.bean.sql.AbstractStatement;
-import io.github.mmm.entity.bean.sql.SqlDialect;
-import io.github.mmm.entity.bean.sql.SqlFormatter;
-import io.github.mmm.entity.bean.sql.select.Result.ResultEntry;
-import io.github.mmm.entity.bean.sql.select.Select;
-import io.github.mmm.entity.bean.sql.select.SelectStatement;
-import io.github.mmm.property.criteria.CriteriaSqlParameters;
-import io.github.mmm.property.criteria.CriteriaSqlParametersIndexed;
-import io.github.mmm.property.criteria.CriteriaSqlParametersNamed;
+import io.github.mmm.entity.bean.db.dialect.DbDialect;
+import io.github.mmm.entity.bean.db.statement.AbstractStatement;
+import io.github.mmm.entity.bean.db.statement.DbStatementFormatter;
+import io.github.mmm.entity.bean.db.statement.select.Select;
+import io.github.mmm.entity.bean.db.statement.select.SelectStatement;
+import io.github.mmm.entity.bean.db.statement.select.Result.ResultEntry;
+import io.github.mmm.property.criteria.CriteriaParameters;
+import io.github.mmm.property.criteria.CriteriaParametersIndexed;
+import io.github.mmm.property.criteria.CriteriaParametersNamed;
 import io.r2dbc.spi.ColumnMetadata;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.Result;
@@ -36,7 +36,7 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
 
   private final Connection connection;
 
-  private final SqlDialect dialect;
+  private final DbDialect dialect;
 
   /**
    * The constructor.
@@ -44,7 +44,7 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
    * @param connection the R2DBC {@link Connection}.
    * @param dialect the {@link #getDialect() SQL dialect}.
    */
-  public R2dbcEntityBeanManager(Connection connection, SqlDialect dialect) {
+  public R2dbcEntityBeanManager(Connection connection, DbDialect dialect) {
 
     super();
     this.connection = connection;
@@ -52,7 +52,7 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
   }
 
   @Override
-  public SqlDialect getDialect() {
+  public DbDialect getDialect() {
 
     return this.dialect;
   }
@@ -115,7 +115,7 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
    * @return the {@link Publisher} of the results.
    */
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  protected Publisher<io.github.mmm.entity.bean.sql.select.Result> mapToResult(Result r2result, Select<?> select) {
+  protected Publisher<io.github.mmm.entity.bean.db.statement.select.Result> mapToResult(Result r2result, Select<?> select) {
 
     return r2result.map((row, rowMetadata) -> {
       List<? extends ColumnMetadata> columnMetadatas = row.getMetadata().getColumnMetadatas();
@@ -127,7 +127,7 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
         Supplier<?> selection = select.getSelections().get(i);
         entries[i++] = new ResultEntry(selection, value);
       }
-      return new io.github.mmm.entity.bean.sql.select.Result(entries);
+      return new io.github.mmm.entity.bean.db.statement.select.Result(entries);
     });
   }
 
@@ -159,18 +159,18 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
    */
   protected Statement createStatement(AbstractStatement<?> statement) {
 
-    SqlFormatter formatter = getDialect().createFormatter();
+    DbStatementFormatter formatter = getDialect().createFormatter();
     String sql = formatter.onStatement(statement).toString();
     Statement r2statement = this.connection.createStatement(sql);
-    CriteriaSqlParameters parameters = formatter.getCriteriaFormatter().getParameters();
-    if (parameters instanceof CriteriaSqlParametersNamed) {
-      Map<String, Object> params = ((CriteriaSqlParametersNamed) parameters).getParameters();
+    CriteriaParameters parameters = formatter.getCriteriaFormatter().getParameters();
+    if (parameters instanceof CriteriaParametersNamed) {
+      Map<String, Object> params = ((CriteriaParametersNamed) parameters).getParameters();
       for (Entry<String, Object> entry : params.entrySet()) {
         Object value = entry.getValue();
         r2statement.bind(entry.getKey(), value);
       }
-    } else if (parameters instanceof CriteriaSqlParametersIndexed) {
-      List<Object> params = ((CriteriaSqlParametersIndexed) parameters).getParameters();
+    } else if (parameters instanceof CriteriaParametersIndexed) {
+      List<Object> params = ((CriteriaParametersIndexed) parameters).getParameters();
       for (int i = 0; i < params.size(); i++) {
         r2statement.bind(i, params.get(i));
       }
