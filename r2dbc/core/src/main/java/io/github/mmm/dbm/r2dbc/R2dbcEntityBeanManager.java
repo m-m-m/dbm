@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 
@@ -13,14 +12,16 @@ import io.github.mmm.bean.WritableBean;
 import io.github.mmm.dbm.base.AbstractEntityBeanManager;
 import io.github.mmm.entity.bean.EntityBean;
 import io.github.mmm.entity.bean.db.dialect.DbDialect;
-import io.github.mmm.entity.bean.db.statement.AbstractStatement;
+import io.github.mmm.entity.bean.db.result.DbResultEntryObject;
+import io.github.mmm.entity.bean.db.result.DbResultObject;
+import io.github.mmm.entity.bean.db.statement.DbStatement;
 import io.github.mmm.entity.bean.db.statement.DbStatementFormatter;
 import io.github.mmm.entity.bean.db.statement.select.Select;
 import io.github.mmm.entity.bean.db.statement.select.SelectStatement;
-import io.github.mmm.entity.bean.db.statement.select.Result.ResultEntry;
 import io.github.mmm.property.criteria.CriteriaParameters;
 import io.github.mmm.property.criteria.CriteriaParametersIndexed;
 import io.github.mmm.property.criteria.CriteriaParametersNamed;
+import io.github.mmm.value.CriteriaSelection;
 import io.r2dbc.spi.ColumnMetadata;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.Result;
@@ -115,19 +116,19 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
    * @return the {@link Publisher} of the results.
    */
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  protected Publisher<io.github.mmm.entity.bean.db.statement.select.Result> mapToResult(Result r2result, Select<?> select) {
+  protected Publisher<DbResultObject> mapToResult(Result r2result, Select<?> select) {
 
     return r2result.map((row, rowMetadata) -> {
       List<? extends ColumnMetadata> columnMetadatas = row.getMetadata().getColumnMetadatas();
-      ResultEntry[] entries = new ResultEntry[columnMetadatas.size()];
+      DbResultEntryObject[] entries = new DbResultEntryObject[columnMetadatas.size()];
       int i = 0;
       for (ColumnMetadata col : columnMetadatas) {
         String columnName = col.getName();
         Object value = row.get(columnName);
-        Supplier<?> selection = select.getSelections().get(i);
-        entries[i++] = new ResultEntry(selection, value);
+        CriteriaSelection<?> selection = select.getSelections().get(i);
+        entries[i++] = new DbResultEntryObject(selection, value);
       }
-      return new io.github.mmm.entity.bean.db.statement.select.Result(entries);
+      return new DbResultObject(entries);
     });
   }
 
@@ -154,10 +155,10 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
   }
 
   /**
-   * @param statement the {@link AbstractStatement} to convert.
+   * @param statement the {@link DbStatement} to convert.
    * @return the converted R2DBC {@link Statement}.
    */
-  protected Statement createStatement(AbstractStatement<?> statement) {
+  protected Statement createStatement(DbStatement<?> statement) {
 
     DbStatementFormatter formatter = getDialect().createFormatter();
     String sql = formatter.onStatement(statement).toString();
