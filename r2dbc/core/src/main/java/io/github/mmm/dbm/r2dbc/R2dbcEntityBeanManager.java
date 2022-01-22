@@ -21,7 +21,7 @@ import io.github.mmm.entity.bean.db.statement.select.SelectStatement;
 import io.github.mmm.property.criteria.CriteriaParameters;
 import io.github.mmm.property.criteria.CriteriaParametersIndexed;
 import io.github.mmm.property.criteria.CriteriaParametersNamed;
-import io.github.mmm.value.CriteriaSelection;
+import io.github.mmm.value.CriteriaObject;
 import io.r2dbc.spi.ColumnMetadata;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.Result;
@@ -125,7 +125,7 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
       for (ColumnMetadata col : columnMetadatas) {
         String columnName = col.getName();
         Object value = row.get(columnName);
-        CriteriaSelection<?> selection = select.getSelections().get(i);
+        CriteriaObject<?> selection = select.getSelections().get(i);
         entries[i++] = new DbResultEntryObject(selection, value);
       }
       return new DbResultObject(entries);
