@@ -95,13 +95,13 @@ public abstract class AbstractEntityBeanManager implements EntityBeanManager {
     Class<E> entityType = id.getEntityType();
     E entity = BeanFactory.get().create(entityType);
     SelectEntity<E> select = new SelectEntity<>(entity);
-    if (entity.isDynamic()) {
-    } else {
-      List<PropertyPath<?>> properties = getProperties(entity);
-      for (PropertyPath<?> property : properties) {
-        select.and(property);
-      }
-    }
+    // if (entity.isDynamic()) {
+    // } else {
+    // List<PropertyPath<?>> properties = getProperties(entity);
+    // for (PropertyPath<?> property : properties) {
+    // select.and(property);
+    // }
+    // }
     return select.from().where(entity.Id().in((Collection) ids)).get();
   }
 
