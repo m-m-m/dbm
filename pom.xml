@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.github.m-m-m</groupId>
     <artifactId>mmm</artifactId>
-    <version>18</version>
+    <version>20</version>
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
   <artifactId>mmm-dbm-parent</artifactId>
@@ -15,7 +15,6 @@
   <description>Provides mapping from mmm beans to multiple database technologies.</description>
 
   <properties>
-    <revision>0-SNAPSHOT</revision>
     <mmm.repository>dbm</mmm.repository>
     <r2dbc.version>0.9.0.RELEASE</r2dbc.version>
     <r2dbc.postgresql.version>0.9.0.RC1</r2dbc.postgresql.version>
