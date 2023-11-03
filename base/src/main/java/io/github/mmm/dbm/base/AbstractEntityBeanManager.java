@@ -75,7 +75,7 @@ public abstract class AbstractEntityBeanManager implements EntityBeanManager {
       return null;
     }
     Id<E> id = ids.iterator().next();
-    Class<E> entityType = id.getEntityType();
+    Class<E> entityType = id.getEntityClass();
     E entity = BeanFactory.get().create(entityType);
     return new Delete().from(entity).where(entity.Id().in((Collection) ids)).get();
   }
@@ -92,7 +92,7 @@ public abstract class AbstractEntityBeanManager implements EntityBeanManager {
       return null;
     }
     Id<E> id = ids.iterator().next();
-    Class<E> entityType = id.getEntityType();
+    Class<E> entityType = id.getEntityClass();
     E entity = BeanFactory.get().create(entityType);
     SelectEntity<E> select = new SelectEntity<>(entity);
     // if (entity.isDynamic()) {
