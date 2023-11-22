@@ -11,16 +11,17 @@ import io.github.mmm.bean.ReadableBean;
 import io.github.mmm.bean.WritableBean;
 import io.github.mmm.dbm.base.AbstractEntityBeanManager;
 import io.github.mmm.entity.bean.EntityBean;
-import io.github.mmm.entity.bean.db.dialect.DbDialect;
-import io.github.mmm.entity.bean.db.result.DbResultEntryObject;
-import io.github.mmm.entity.bean.db.result.DbResultObject;
-import io.github.mmm.entity.bean.db.statement.DbStatement;
-import io.github.mmm.entity.bean.db.statement.DbStatementFormatter;
-import io.github.mmm.entity.bean.db.statement.select.Select;
-import io.github.mmm.entity.bean.db.statement.select.SelectStatement;
+import io.github.mmm.orm.dialect.DbDialect;
+import io.github.mmm.orm.param.CriteriaParametersIndexed;
+import io.github.mmm.orm.param.CriteriaParametersNamed;
+import io.github.mmm.orm.result.DbResultEntryObject;
+import io.github.mmm.orm.result.DbResultObject;
+import io.github.mmm.orm.statement.DbStatement;
+import io.github.mmm.orm.statement.DbStatementFormatter;
+import io.github.mmm.orm.statement.select.Select;
+import io.github.mmm.orm.statement.select.SelectStatement;
+import io.github.mmm.property.criteria.CriteriaParameter;
 import io.github.mmm.property.criteria.CriteriaParameters;
-import io.github.mmm.property.criteria.CriteriaParametersIndexed;
-import io.github.mmm.property.criteria.CriteriaParametersNamed;
 import io.github.mmm.value.CriteriaObject;
 import io.r2dbc.spi.ColumnMetadata;
 import io.r2dbc.spi.Connection;
@@ -163,7 +164,7 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
     DbStatementFormatter formatter = getDialect().createFormatter();
     String sql = formatter.onStatement(statement).toString();
     Statement r2statement = this.connection.createStatement(sql);
-    CriteriaParameters parameters = formatter.getCriteriaFormatter().getParameters();
+    CriteriaParameters<?> parameters = formatter.getCriteriaFormatter().getParameters();
     if (parameters instanceof CriteriaParametersNamed) {
       Map<String, Object> params = ((CriteriaParametersNamed) parameters).getParameters();
       for (Entry<String, Object> entry : params.entrySet()) {
@@ -171,9 +172,8 @@ public class R2dbcEntityBeanManager extends AbstractEntityBeanManager {
         r2statement.bind(entry.getKey(), value);
       }
     } else if (parameters instanceof CriteriaParametersIndexed) {
-      List<Object> params = ((CriteriaParametersIndexed) parameters).getParameters();
-      for (int i = 0; i < params.size(); i++) {
-        r2statement.bind(i, params.get(i));
+      for (CriteriaParameter<?> param : parameters) {
+        r2statement.bind(param.getIndex(), param.getValue());
       }
     } else {
       throw new IllegalStateException();

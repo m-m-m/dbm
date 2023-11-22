@@ -6,7 +6,7 @@ import org.reactivestreams.Subscription;
 
 import io.github.mmm.dbm.DbClient;
 import io.github.mmm.dbm.EntityBeanManager;
-import io.github.mmm.entity.bean.db.dialect.DbDialect;
+import io.github.mmm.orm.dialect.DbDialect;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 

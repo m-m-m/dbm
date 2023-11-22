@@ -7,14 +7,14 @@ import java.util.Collection;
 import org.reactivestreams.Publisher;
 
 import io.github.mmm.entity.bean.EntityBean;
-import io.github.mmm.entity.bean.db.statement.delete.DeleteStatement;
-import io.github.mmm.entity.bean.db.statement.insert.Insert;
-import io.github.mmm.entity.bean.db.statement.insert.InsertStatement;
-import io.github.mmm.entity.bean.db.statement.select.SelectStatement;
-import io.github.mmm.entity.bean.db.statement.update.Update;
-import io.github.mmm.entity.bean.db.statement.update.UpdateStatement;
 import io.github.mmm.entity.id.Id;
 import io.github.mmm.entity.link.Link;
+import io.github.mmm.orm.statement.delete.DeleteStatement;
+import io.github.mmm.orm.statement.insert.Insert;
+import io.github.mmm.orm.statement.insert.InsertStatement;
+import io.github.mmm.orm.statement.select.SelectStatement;
+import io.github.mmm.orm.statement.update.Update;
+import io.github.mmm.orm.statement.update.UpdateStatement;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

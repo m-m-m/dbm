@@ -14,7 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mmm-entity-db</artifactId>
+      <artifactId>mmm-orm</artifactId>
     </dependency>
     <dependency>
       <groupId>io.projectreactor</groupId>
