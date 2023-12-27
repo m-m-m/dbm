@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
 
-import io.github.mmm.bean.BeanFactory;
+import io.github.mmm.base.service.ServiceHelper;
 import io.github.mmm.dbm.DbClient;
 import io.github.mmm.dbm.DbClientFactory;
 import io.github.mmm.dbm.config.DbConfig;
 
 /**
- * Implementation of {@link BeanFactory}.
+ * Implementation of {@link DbClientFactory}.
  */
 public final class DbClientFactoryManager implements DbClientFactory {
 
@@ -26,10 +26,7 @@ public final class DbClientFactoryManager implements DbClientFactory {
 
     super();
     this.delegates = new ArrayList<>();
-    ServiceLoader<DbClientFactory> loader = ServiceLoader.load(DbClientFactory.class);
-    for (DbClientFactory factory : loader) {
-      this.delegates.add(factory);
-    }
+    ServiceHelper.all(ServiceLoader.load(DbClientFactory.class), this.delegates);
   }
 
   @Override
